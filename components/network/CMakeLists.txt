@@ -1,0 +1,18 @@
+idf_component_register(
+  SRCS
+  "captivePortal.c"
+  "dns_server.c"
+  "mqtt.c"
+  "wifi.c"
+  INCLUDE_DIRS
+  "include"
+  REQUIRES
+  network
+  peripherals
+  services
+  esp_netif
+  esp_wifi
+  esp_event
+  esp_http_server
+  mbedtls
+  espressif__mqtt)

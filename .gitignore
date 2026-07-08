@@ -1,0 +1,6 @@
+build/
+build_*_*/
+sdkconfig*
+dependencies.lock
+managed_components/
+compile_commands.json

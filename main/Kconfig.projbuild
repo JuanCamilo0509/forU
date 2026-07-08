@@ -1,0 +1,87 @@
+menu "Wifi Config"
+
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "myssid"
+        help
+            SSID (network name) for the example to connect to.
+
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+
+    config ESP_MAXIMUM_RETRY
+        int "Maximum retry"
+        default 5
+        help
+            Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+
+endmenu
+
+menu "Broker Configuration"
+
+    config EXAMPLE_MQTT_BROKER_URI
+        string "MQTT broker URI"
+        default "mqtts://test.mosquitto.org:8886"
+        default "mqtts://test.mosquitto.org:8883" if EXAMPLE_CERT_VALIDATE_MOSQUITTO_CA
+        help
+            URI to the MQTT broker.
+            When using the example broker the port must be set to 8883 if testing
+            embedded certificate
+
+    config MQTT_USERNAME
+      string "USERNAME"
+    config MQTT_PASSWORD
+      string "PASSWORD"
+
+    config EXAMPLE_BROKER_CERTIFICATE_OVERRIDE
+        string "Broker certificate override (PEM body)"
+        default ""
+        help
+            Optional: override server certificate by embedding a PEM constructed
+            from this base64 body. Leave empty to use the certificate bundle or the
+            embedded Mosquitto CA. Provide only the base64 payload without the
+            BEGIN/END markers.
+
+    config EXAMPLE_BROKER_CERTIFICATE_OVERRIDDEN
+        bool
+        default y if EXAMPLE_BROKER_CERTIFICATE_OVERRIDE != ""
+
+endmenu
+
+menu "OLED"
+
+    orsource "$IDF_PATH/examples/common_components/env_caps/$IDF_TARGET/Kconfig.env_caps"
+
+    config I2C_DISPLAY_ADDRESS
+        hex "Display I2C Address"
+        range 0x00 0x7F
+        default 0x3C
+        help
+            I2C address of the target display, usually 0x3C or 0x3D.
+
+    config I2C_MASTER_SCL
+        int "SCL GPIO Num"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
+        default 18 if IDF_TARGET_ESP32
+        default 4
+        help
+            GPIO number for I2C Master clock line.
+
+    config I2C_MASTER_SDA
+        int "SDA GPIO Num"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
+        default 19 if IDF_TARGET_ESP32
+        default 5
+        help
+            GPIO number for I2C Master data line.
+
+    config I2C_MASTER_FREQUENCY
+        int "Master Frequency"
+        default 400000
+        help
+            I2C Speed of Master device.
+
+endmenu

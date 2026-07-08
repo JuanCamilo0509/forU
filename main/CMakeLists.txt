@@ -1,0 +1,9 @@
+idf_component_register(
+  SRCS
+  "main.c"
+  REQUIRES
+  network
+  peripherals
+  services
+  INCLUDE_DIRS
+  ".")

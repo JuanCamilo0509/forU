@@ -1,0 +1,14 @@
+idf_component_register(
+  SRCS
+  "gpio_manager.c"
+  "gyroscope.c"
+  "oledScreen.c"
+  "u8g2_demo.c"
+  REQUIRES
+  network
+  services
+  esp_driver_i2c
+  u8g2
+  esp_driver_gpio
+  INCLUDE_DIRS
+  "include")

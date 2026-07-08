@@ -1,0 +1,14 @@
+idf_component_register(
+  SRCS
+  "date.c"
+  "global_memory.c"
+  "nvs_manager.c"
+  "provisioning.c"
+  INCLUDE_DIRS
+  "include"
+  REQUIRES
+  network
+  peripherals
+  nvs_flash
+  EMBED_FILES
+  root.html)
