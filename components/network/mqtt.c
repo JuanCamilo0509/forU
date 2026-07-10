@@ -111,3 +111,17 @@ esp_err_t mqtt_app_start(int wait) {
 
   return result;
 }
+
+void mqtt_disconnect(void) {
+  if (client != NULL) {
+    esp_err_t err = esp_mqtt_client_stop(client);
+    if (err == ESP_OK) {
+      ESP_LOGI(MqtTAG, "Client closed");
+    }
+    err = esp_mqtt_client_destroy(client);
+    if (err == ESP_OK) {
+      ESP_LOGI(MqtTAG, "Free of mqtt resources");
+      client = NULL;
+    }
+  }
+}

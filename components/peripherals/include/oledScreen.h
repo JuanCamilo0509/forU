@@ -57,6 +57,7 @@ uint8_t u8x8_gpio_delay_cb(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
 void iconScreenTask(void *pvParameters);
 
 void screenInit(void);
+void screenPowerSave(void);
 
 void u8g2_ClearSection(u8g2_t *u8g2, int x, int y, int w, int h);
 

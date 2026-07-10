@@ -1,4 +1,7 @@
 #include "provisioning.h"
+#include "oledScreen.h"
+
+volatile uint32_t last_activity_time = 0;
 
 void testProtocol() {
   screen_event_t event;
@@ -46,4 +49,32 @@ void startCaptivePortal() {
 
   wifi_init_softap();
   captivePortal();
+}
+
+void reset_inactivity_timer(void) {
+  last_activity_time = pdTICKS_TO_MS(xTaskGetTickCount());
+}
+
+void power_management_task(void *arg) {
+  ESP_LOGI("POWER", "Inactivity monitor set");
+  reset_inactivity_timer();
+
+  while (1) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    uint32_t current_time = pdTICKS_TO_MS(xTaskGetTickCount());
+    uint32_t elapsed = current_time - last_activity_time;
+
+    if (elapsed >= INACTIVITY_TIMEOUT_MS) {
+      ESP_LOGW("POWER", "Inactive for %d s", elapsed / 1000);
+
+      screenPowerSave();
+      mqtt_disconnect();
+      esp_wifi_stop();
+
+      vTaskDelay(pdMS_TO_TICKS(100));
+
+      esp_deep_sleep_start();
+    }
+  }
 }

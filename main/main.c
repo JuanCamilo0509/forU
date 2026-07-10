@@ -1,4 +1,3 @@
-#include "global_memory.h" // I can change this to the nvs_manager instead
 #include "gpio_manager.h"
 #include "gyroscope.h"
 #include "nvs_manager.h"
@@ -10,7 +9,10 @@ QueueHandle_t screenQueue;
 configuration_variables g_config;
 int8_t passed;
 
-static void gestureDetectionTask(void *arg) { gestureDetection(); }
+static void gestureDetectionTask(void *arg) {
+  gestureDetection();
+  vTaskDelete(NULL);
+}
 
 void init_shared_i2c_bus(void) {
   i2c_master_bus_config_t bus_config = {
@@ -24,6 +26,7 @@ void init_shared_i2c_bus(void) {
   ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &global_i2c_bus_handle));
 }
 
+
 void app_main(void) {
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
@@ -31,13 +34,12 @@ void app_main(void) {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
+
   ESP_ERROR_CHECK(ret);
 
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-  // External interruption for the variable hard reset.
-  // Interruption for the wake up pin.
   initGpios();
 
   init_shared_i2c_bus();
@@ -53,6 +55,7 @@ void app_main(void) {
     startCaptivePortal();
     return;
   }
+
   if (passed == 0) {
     configScreen();
     testProtocol();
@@ -61,7 +64,13 @@ void app_main(void) {
     mqtt_app_start(0);
     init_sntp();
     iconScreen();
+
+    esp_sleep_enable_ext0_wakeup(12, 1);
+
+    xTaskCreate(power_management_task, "power task", 3072, NULL, 2, NULL);
+
     if (bmi160Init()) {
+      gestureDetection();
       xTaskCreate(gestureDetectionTask, "gesture_task", 4096, NULL, 5, NULL);
     } else {
       ESP_LOGE("MAIN", "Something went wrong");

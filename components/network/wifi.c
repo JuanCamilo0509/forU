@@ -1,6 +1,4 @@
 #include "wifi.h"
-#include "global_memory.h"
-#include "lwip/inet.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1

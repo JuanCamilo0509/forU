@@ -202,6 +202,7 @@ void screenInit(void) {
   u8g2_InitDisplay(&u8g2);
   u8g2_SetPowerSave(&u8g2, 0);
 }
+void screenPowerSave(void) { u8g2_SetPowerSave(&u8g2, 1); }
 
 void iconScreen(void) {
   u8g2_ClearBuffer(&u8g2);

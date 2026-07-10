@@ -2,6 +2,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "oledScreen.h"
+#include "provisioning.h"
 #include <stdint.h>
 
 extern i2c_master_bus_handle_t global_i2c_bus_handle;
@@ -36,16 +37,9 @@ void gestureDetection() {
   while (1) {
     readFromBMI160(&gx, &gy, &gz, &ax, &ay, &az);
 
-    uint8_t s0, s1, s2, s3;
-
-    bmi160_register_read(dev_handle, 0x1C, &s0, 1);
-    bmi160_register_read(dev_handle, 0x1D, &s1, 1);
-    bmi160_register_read(dev_handle, 0x1E, &s2, 1);
-    bmi160_register_read(dev_handle, 0x1F, &s3, 1);
-    // ESP_LOGI(TAG, "INT_STATUS: %02X %02X %02X %02X", s0, s1, s2, s3);
     int eventDetected = 0;
-    ESP_LOGI("MAIN", "gX: %d | gY: %d | gZ: %d | aX: %d | aY: %d | aZ: %d", gx,
-             gy, gz, ax, ay, az);
+    // ESP_LOGI("MAIN", "gX: %d | gY: %d | gZ: %d | aX: %d | aY: %d | aZ: %d",
+    // gx, gy, gz, ax, ay, az);
     if (gx > 5000) {
       screenEvent.type = UP;
       eventDetected = 1;
@@ -61,6 +55,7 @@ void gestureDetection() {
     }
 
     if (eventDetected) {
+      reset_inactivity_timer();
       if (xQueueSend(screenQueue, &screenEvent, pdMS_TO_TICKS(10)) != pdPASS) {
         ESP_LOGW(TAG, "Screen queue full, event dropped!");
       }
@@ -70,25 +65,7 @@ void gestureDetection() {
   }
 }
 
-int bmi160Init() {
-  uint8_t data[1];
-
-  i2c_master_init(&global_i2c_bus_handle, &dev_handle);
-  ESP_LOGI(TAG, "I2C initialized successfully");
-
-  ESP_ERROR_CHECK(
-      bmi160_register_read(dev_handle, BMI160_CHIPID_REG_ADDR, data, 1));
-  ESP_LOGI(TAG, "BMI160 CHIP_ID = %X", data[0]);
-
-  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0xB6));
-  vTaskDelay(pdMS_TO_TICKS(120));
-
-  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0x11));
-  vTaskDelay(pdMS_TO_TICKS(10));
-
-  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0x15));
-  vTaskDelay(pdMS_TO_TICKS(60));
-
+void anyMontionConfiguration(size_t sensibility) {
   ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x41, 0x03));
 
   ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x53, 0x0A));
@@ -101,12 +78,32 @@ int bmi160Init() {
 
   ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x5F, 0x00));
 
-  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x60, 0x14));
+  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x60, 0x80));
+}
 
-  uint8_t reg;
+int bmi160Init() {
+  uint8_t data[1];
 
-  bmi160_register_read(dev_handle, 0x53, &reg, 1);
-  ESP_LOGI(TAG, "INT_OUT_CTRL = %02X", reg);
+  i2c_master_init(&global_i2c_bus_handle, &dev_handle);
+  ESP_LOGI(TAG, "I2C initialized successfully");
+
+  ESP_ERROR_CHECK(
+      bmi160_register_read(dev_handle, BMI160_CHIPID_REG_ADDR, data, 1));
+  ESP_LOGI(TAG, "BMI160 CHIP_ID = %X", data[0]);
+
+  // Soft reset
+  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0xB6));
+  vTaskDelay(pdMS_TO_TICKS(120));
+
+  // Accelerometer
+  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0x11));
+  vTaskDelay(pdMS_TO_TICKS(10));
+
+  // Gyroscope
+  ESP_ERROR_CHECK(bmi160_register_write_byte(dev_handle, 0x7E, 0x15));
+  vTaskDelay(pdMS_TO_TICKS(60));
+
+  anyMontionConfiguration(0x90);
 
   ESP_LOGI(TAG, "I2C de-initialized successfully");
   return 1;
