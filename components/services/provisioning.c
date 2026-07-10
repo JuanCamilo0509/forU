@@ -68,6 +68,7 @@ void power_management_task(void *arg) {
     if (elapsed >= INACTIVITY_TIMEOUT_MS) {
       ESP_LOGW("POWER", "Inactive for %d s", elapsed / 1000);
 
+      // TODO: powerSaveModeBMI160(0);
       screenPowerSave();
       mqtt_disconnect();
       esp_wifi_stop();

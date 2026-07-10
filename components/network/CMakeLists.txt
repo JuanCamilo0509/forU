@@ -4,15 +4,20 @@ idf_component_register(
   "dns_server.c"
   "mqtt.c"
   "wifi.c"
+  "otaImplementation.c"
   INCLUDE_DIRS
   "include"
   REQUIRES
   network
+  esp_wifi
+  esp_psram
   peripherals
   services
   esp_netif
-  esp_wifi
   esp_event
   esp_http_server
+  esp_http_client
+  app_update
+  esp_https_ota
   mbedtls
   espressif__mqtt)

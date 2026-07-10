@@ -18,6 +18,7 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base,
 
     esp_mqtt_client_subscribe(client, g_config.topic, 0);
     esp_mqtt_client_subscribe(client, g_config.mqtt_user, 0);
+    esp_mqtt_client_subscribe(client, "update", 0);
 
     if (s_mqtt_event_group) {
       xEventGroupSetBits(s_mqtt_event_group, MQTT_CONNECTED_BIT);
@@ -49,6 +50,13 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base,
 
     if (strncmp(event->topic, g_config.topic, event->topic_len) == 0) {
       screenEvent.type = USR2;
+      ESP_LOGI(MqtTAG, "USR2");
+    }
+
+    if (strncmp(event->topic, "update", sizeof("upadate")) == 0) {
+      screenEvent.type = UPDATE;
+
+      start_ota_update("");
       ESP_LOGI(MqtTAG, "USR2");
     }
 

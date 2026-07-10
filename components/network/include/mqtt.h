@@ -1,4 +1,5 @@
 #pragma once
+#include "otaImplementation.h"
 #include "wifi.h"
 #include <inttypes.h>
 #include <stddef.h>
@@ -11,9 +12,9 @@
 #include "esp_netif.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
+#include "nvs_manager.h"
 #include "oledScreen.h"
 #include "sdkconfig.h"
-#include "nvs_manager.h"
 
 #include "esp_crt_bundle.h"
 #include "mqtt_client.h"

@@ -186,6 +186,11 @@ void iconScreenTask(void *pvParameters) {
         u8g2_ClearSection(&u8g2, 25, 0, 80, 32);
         printStrDoubleLine(&u8g2, event.text, "dias", CENTER_CENTER);
         break;
+      case UPDATE:
+        u8g2_ClearBuffer(&u8g2);
+        printStrDoubleLine(&u8g2, "UPDATE", "New features in comming.",
+                           CENTER_CENTER);
+        break;
       default:
         u8g2_ClearBuffer(&u8g2);
         printStrDoubleLine(&u8g2, "Wtf", "Como llegamos aquí", CENTER_CENTER);

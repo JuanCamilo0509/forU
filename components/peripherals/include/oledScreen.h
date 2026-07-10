@@ -38,7 +38,8 @@ typedef enum {
   DAY_CHANGE,
   ERROR,
   OK_WIFI,
-  OK_MQTT
+  OK_MQTT,
+  UPDATE
 } event_type;
 extern time_t timestamp_global;
 
