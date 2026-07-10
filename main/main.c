@@ -9,7 +9,8 @@ i2c_master_bus_handle_t global_i2c_bus_handle;
 QueueHandle_t screenQueue;
 configuration_variables g_config;
 int8_t passed;
-SemaphoreHandle_t reset_sem = NULL;
+
+static void gestureDetectionTask(void *arg) { gestureDetection(); }
 
 void init_shared_i2c_bus(void) {
   i2c_master_bus_config_t bus_config = {
@@ -61,7 +62,7 @@ void app_main(void) {
     init_sntp();
     iconScreen();
     if (bmi160Init()) {
-      gestureDetection();
+      xTaskCreate(gestureDetectionTask, "gesture_task", 4096, NULL, 5, NULL);
     } else {
       ESP_LOGE("MAIN", "Something went wrong");
     }

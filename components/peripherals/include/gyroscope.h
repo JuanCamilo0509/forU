@@ -62,7 +62,9 @@ esp_err_t bmi160_register_write_byte(i2c_master_dev_handle_t dev_handle,
 void i2c_master_init(i2c_master_bus_handle_t *bus_handle,
                      i2c_master_dev_handle_t *dev_handle);
 
-void readFromBMI160(int16_t *gyro_x, int16_t *gyro_y, int16_t *gyro_z);
+void readFromBMI160(int16_t *gyro_x, int16_t *gyro_y, int16_t *gyro_z,
+                    int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
 
 int bmi160Init(void);
+
 void gestureDetection(void);

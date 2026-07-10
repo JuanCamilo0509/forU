@@ -142,10 +142,9 @@ void iconScreenTask(void *pvParameters) {
   while (1) {
     if (xQueueReceive(screenQueue, &event, portMAX_DELAY) == pdTRUE) {
       ESP_LOGI("U8G2", "Current Index: %d", current);
-      // TODO: Create a global variable for the icons quantities.
-      // BUG: There is an error with this when you get to the first index.
-      int next_index = (current + 1) % 13;
-      int prev_index = (current - 1 < 0) ? 13 : current - 1;
+      const int icons_size = sizeof(icons) / sizeof(icons[0]);
+      int next_index = (current + 1) % icons_size;
+      int prev_index = (current - 1 < 0) ? (icons_size - 1) : current - 1;
 
       switch (event.type) {
       case SELECT:

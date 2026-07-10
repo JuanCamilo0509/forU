@@ -122,34 +122,17 @@ void wifi_init_softap(void) {
       .ap =
           {
               .ssid = "ESP_softAP",
-              .ssid_len = strlen("ESP_softAP"),
-              // .channel = EXAMPLE_ESP_WIFI_CHANNEL,
+              .ssid_len = 0,
+              .channel = 1,
               .password = "",
               .max_connection = 4,
-  // .max_connection = EXAMPLE_MAX_STA_CONN,
-#ifdef CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT
-              .authmode = WIFI_AUTH_WPA3_PSK,
-              .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
-#else /* CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT */
-              .authmode = WIFI_AUTH_WPA2_PSK,
-#endif
+              .authmode = WIFI_AUTH_OPEN,
               .pmf_cfg =
                   {
-                      .required = true,
+                      .required = false,
                   },
-#ifdef CONFIG_ESP_WIFI_BSS_MAX_IDLE_SUPPORT
-              .bss_max_idle_cfg =
-                  {
-                      .period = WIFI_AP_DEFAULT_MAX_IDLE_PERIOD,
-                      .protected_keep_alive = 1,
-                  },
-#endif
-              // .gtk_rekey_interval = EXAMPLE_GTK_REKEY_INTERVAL,
           },
   };
-  if (strlen("") == 0 && wifi_config.ap.authmode != WIFI_AUTH_OWE) {
-    wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-  }
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));

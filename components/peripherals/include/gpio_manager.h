@@ -5,6 +5,6 @@
 
 void initGpios();
 
-void gpio_isr_handler(void *arg);
+void reset_handler(void *arg);
 
 void reset_task(void *arg);
