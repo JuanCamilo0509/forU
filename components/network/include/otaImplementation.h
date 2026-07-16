@@ -7,12 +7,15 @@
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <stdbool.h>
 #include "string.h"
 
-static const char *TAG = "OTA_SERVICE";
+static const char *OTATAG = "OTA_SERVICE";
 
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 static void ota_task(void *pvParameter);
 
+void ota_set_update_in_progress(bool active);
+bool ota_is_update_in_progress(void);
 void start_ota_update(const char *download_url);

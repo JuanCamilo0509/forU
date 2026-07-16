@@ -8,6 +8,7 @@ i2c_master_bus_handle_t global_i2c_bus_handle;
 QueueHandle_t screenQueue;
 configuration_variables g_config;
 int8_t passed;
+TaskHandle_t power_task_handle = NULL;
 
 static void gestureDetectionTask(void *arg) {
   gestureDetection();
@@ -25,7 +26,6 @@ void init_shared_i2c_bus(void) {
   };
   ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &global_i2c_bus_handle));
 }
-
 
 void app_main(void) {
   esp_err_t ret = nvs_flash_init();
@@ -67,7 +67,8 @@ void app_main(void) {
 
     esp_sleep_enable_ext0_wakeup(12, 1);
 
-    xTaskCreate(power_management_task, "power task", 3072, NULL, 2, NULL);
+    xTaskCreate(power_management_task, "power task", 3072, NULL, 2,
+                &power_task_handle);
 
     if (bmi160Init()) {
       gestureDetection();

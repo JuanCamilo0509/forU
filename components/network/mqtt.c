@@ -3,6 +3,7 @@
 const char *MqtTAG = "MQTT conectado";
 extern QueueHandle_t screenQueue;
 extern configuration_variables g_config;
+extern TaskHandle_t power_task_handle;
 esp_mqtt_client_handle_t client;
 static EventGroupHandle_t s_mqtt_event_group;
 #define MQTT_CONNECTED_BIT BIT0
@@ -39,7 +40,11 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base,
   case MQTT_EVENT_DATA:
     ESP_LOGI(MqtTAG, "MQTT_EVENT_DATA (%d)", event->data_len);
     screen_event_t screenEvent;
-    int size = event->data_len;
+    size_t size = event->data_len;
+    if (size >= sizeof(screenEvent.text)) {
+      size = sizeof(screenEvent.text) - 1;
+      ESP_LOGW(MqtTAG, "MQTT payload truncated to %u bytes", (unsigned)size);
+    }
     memcpy(screenEvent.text, event->data, size);
     screenEvent.text[size] = '\0';
 
@@ -53,11 +58,20 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base,
       ESP_LOGI(MqtTAG, "USR2");
     }
 
-    if (strncmp(event->topic, "update", sizeof("upadate")) == 0) {
+    if (event->topic_len == strlen("update") &&
+        strncmp(event->topic, "update", event->topic_len) == 0) {
       screenEvent.type = UPDATE;
-
-      start_ota_update("");
-      ESP_LOGI(MqtTAG, "USR2");
+      ESP_LOGW(MqtTAG, "UPDATE topic received, payload=%s", screenEvent.text);
+      if (power_task_handle != NULL) {
+        vTaskSuspend(power_task_handle);
+        ESP_LOGW("POWER", "Inactivity monitor suspended for OTA");
+      }
+      reset_inactivity_timer();
+      if (power_task_handle != NULL) {
+        ESP_LOGI(MqtTAG, "Starting OTA worker");
+      }
+      start_ota_update(screenEvent.text);
+      ESP_LOGI(MqtTAG, "OTA request dispatched");
     }
 
     xQueueSend(screenQueue, &screenEvent, 0);

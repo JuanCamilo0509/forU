@@ -2,6 +2,7 @@
 #include "otaImplementation.h"
 #include "wifi.h"
 #include <inttypes.h>
+#include "provisioning.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

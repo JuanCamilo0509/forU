@@ -58,15 +58,32 @@ void reset_inactivity_timer(void) {
 void power_management_task(void *arg) {
   ESP_LOGI("POWER", "Inactivity monitor set");
   reset_inactivity_timer();
+  bool ota_was_active = false;
 
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(1000));
+
+    if (ota_is_update_in_progress()) {
+      if (!ota_was_active) {
+        ESP_LOGW("POWER", "OTA active, deep sleep paused");
+        ota_was_active = true;
+      }
+      reset_inactivity_timer();
+      continue;
+    }
+
+    if (ota_was_active) {
+      ESP_LOGI("POWER", "OTA finished, inactivity monitor resumed");
+      ota_was_active = false;
+      reset_inactivity_timer();
+    }
 
     uint32_t current_time = pdTICKS_TO_MS(xTaskGetTickCount());
     uint32_t elapsed = current_time - last_activity_time;
 
     if (elapsed >= INACTIVITY_TIMEOUT_MS) {
-      ESP_LOGW("POWER", "Inactive for %d s", elapsed / 1000);
+      ESP_LOGW("POWER", "Inactive for %lu s, entering deep sleep",
+               (unsigned long)(elapsed / 1000));
 
       // TODO: powerSaveModeBMI160(0);
       screenPowerSave();
